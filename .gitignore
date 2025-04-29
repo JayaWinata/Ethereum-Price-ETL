@@ -8,3 +8,4 @@ airflow_settings.yaml
 packages.txt
 secrets
 .airflowignore
+__pycache__

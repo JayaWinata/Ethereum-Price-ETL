@@ -1,22 +1,27 @@
-from airflow import DAG
-from airflow.providers.http.operators.http import SimpleHttpOperator
-from airflow.decorators import task
+from airflow.providers.http.operators.http import HttpOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from airflow.utils.dates import days_ago
-import json
+from airflow.decorators import task
 from dotenv import load_dotenv
-import os
+from airflow import DAG
+
+from datetime import datetime, timedelta
+import pendulum
 import logging
+import json
+import os
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
 load_dotenv('/secrets/tiingo.env')
 TOKEN = os.getenv('TOKEN')
 
+today = datetime.today()
+previous_day = today - timedelta(days=1)
+
 with DAG(
     dag_id='ethereum_price_etl',
-    start_date=days_ago(2),
-    schedule_interval='@weekly',
+    start_date=pendulum.today().subtract(2),
+    schedule='@weekly',
     catchup=False
 ) as dag:
 
@@ -42,14 +47,14 @@ with DAG(
         postgres_hook.run(query)
 
 
-    extract_price = SimpleHttpOperator(
+    extract_price = HttpOperator(
         task_id='extract_eth_price',
         http_conn_id='tiingo_api',  # point to https://api.tiingo.com
         endpoint='tiingo/crypto/prices',  # Only the path
         method='GET',
         data={
             "tickers": "ethusd",
-            "startDate": "{{ prev_ds }}",
+            "startDate": previous_day.strftime('%Y-%m-%d'),
             "resampleFreq": "1day"
         },
         headers={
@@ -62,7 +67,7 @@ with DAG(
 
     @task
     def transform_eth_price_data(response):
-        temp = response['priceData']
+        temp = response[0]['priceData'][0]
         eth_price_data = {
             "date": temp['date'],
             'open_price': temp['open'],
@@ -84,7 +89,7 @@ with DAG(
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         '''
 
-        postgres_hook.run(query, parameters={
+        postgres_hook.run(query, parameters=(
             eth_price_data['date'],
             eth_price_data['open_price'],
             eth_price_data['high_price'],
@@ -92,7 +97,7 @@ with DAG(
             eth_price_data['close_price'],
             eth_price_data['volume'],
             eth_price_data['trades']
-        })
+        ))
 
     ## Dependencies
     create_table() >> extract_price
