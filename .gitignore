@@ -9,3 +9,4 @@ packages.txt
 secrets
 .airflowignore
 __pycache__
+README.txt
