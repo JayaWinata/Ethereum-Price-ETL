@@ -1,1 +1,10 @@
 temp.txt
+include
+plugins
+tests
+.env
+.astro
+airflow_settings.yaml
+packages.txt
+secrets
+.airflowignore
