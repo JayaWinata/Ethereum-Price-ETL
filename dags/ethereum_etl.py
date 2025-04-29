@@ -21,7 +21,7 @@ previous_day = today - timedelta(days=1)
 with DAG(
     dag_id='ethereum_price_etl',
     start_date=pendulum.today().subtract(2),
-    schedule='@weekly',
+    schedule='@daily',
     catchup=False
 ) as dag:
 
