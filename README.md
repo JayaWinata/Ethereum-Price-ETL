@@ -2,7 +2,7 @@
 
 ##   Overview
 
-This project is an Ethereum Price ETL pipeline built using Apache Airflow and Astronomer. It automatically extracts Ethereum (ETH) price data from an API, transforms the data into a structured format, and loads it into a PostgreSQL database for future analysis. The project demonstrates a real-world ETL workflow designed for cryptocurrency data collection and management.
+This project is a demonstration of how to build and run data pipelines using **Apache Airflow** with **Astronomer**. It showcases key features such as DAG scheduling, task orchestration, and local development using the Astronomer CLI. The pipeline is designed to extract Ethereum (ETH) price data from a public API, transform it into a structured format, and load it into a PostgreSQL database for future analysis. This example illustrates a real-world ETL workflow tailored for cryptocurrency data collection and management.
 
 ## Key Features
 
